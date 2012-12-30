@@ -28,20 +28,21 @@ node.default["nginx"]["passenger"]["max_instances_per_app"] = 0
 node.default["nginx"]["passenger"]["pool_idle_time"] = 300
 node.default["nginx"]["passenger"]["max_requests"] = 0
 
-packages = value_for_platform( ["redhat", "centos", "scientific", "amazon", "oracle"] => {
-                                 "default" => %w(ruby-devel curl-devel) },
-                               ["ubuntu", "debian"] => {
-                                 "default" => %w(ruby-dev curl-dev) } )
+unless node.recipe?("rbenv::user") || node.recipe?("rbenv::system")
+  package "ruby-dev" do
+    action :install
+    only_if { platform?("debian", "ubuntu") }
+  end
 
-packages.each do |devpkg|
-  package devpkg
-end
+  package "ruby-devel" do
+    action :install
+    only_if { !platform?("debian", "ubuntu") }
+  end
 
-gem_package 'rake'
-
-gem_package 'passenger' do
-  action :install
-  version node["nginx"]["passenger"]["version"]
+  gem_package 'passenger' do
+    action :install
+    version node["nginx"]["passenger"]["version"]
+  end
 end
 
 template "#{node["nginx"]["dir"]}/conf.d/passenger.conf" do
