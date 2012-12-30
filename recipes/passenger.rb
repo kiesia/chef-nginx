@@ -28,6 +28,11 @@ node.default["nginx"]["passenger"]["max_instances_per_app"] = 0
 node.default["nginx"]["passenger"]["pool_idle_time"] = 300
 node.default["nginx"]["passenger"]["max_requests"] = 0
 
+package "libcurl4-openssl-dev" do
+  action :install
+  only_if { platform?("debian", "ubuntu") }
+end
+
 unless node.recipe?("rbenv::user") || node.recipe?("rbenv::system")
   package "ruby-dev" do
     action :install
